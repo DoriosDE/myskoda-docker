@@ -7,8 +7,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install the myskoda[cli] package with pip
-RUN pip install myskoda
-RUN pip install myskoda[cli]
+RUN pip3.10 install myskoda[cli]
 
 # Set the default command to bash (optional)
 CMD ["bash"]
