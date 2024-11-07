@@ -1,13 +1,16 @@
-# Use the official Python Ubuntu image as the base image
-FROM python:3.10-slim
+# Use the official Python Alpine image as the base image
+FROM python:3.12-alpine
 
-# Install OS dependencies necessary for building Python packages
-RUN apt-get update && \
-    apt-get install -y gcc python3-dev libffi-dev libssl-dev && \
-    rm -rf /var/lib/apt/lists/*
+# Install any OS dependencies necessary for building Python packages
+RUN apk update && \
+    apk add --no-cache --virtual .build-deps gcc musl-dev python3-dev libffi-dev openssl-dev && \
+    apk add --no-cache bash
 
 # Install the myskoda[cli] package with pip
-RUN pip3.10 install myskoda[cli]
+RUN pip install --no-cache-dir myskoda[cli]
+
+# Remove build dependencies to keep the image size small
+RUN apk del .build-deps
 
 # Set the default command to bash (optional)
-CMD ["bash"]
+CMD ["/bin/bash"]
