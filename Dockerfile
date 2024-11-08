@@ -7,7 +7,7 @@ RUN apk update && \
     apk add --no-cache bash
 
 # Install the myskoda[cli] package with pip
-RUN pip install --no-cache-dir myskoda[cli]
+RUN pip install --no-cache-dir myskoda[cli]==0.9.1
 
 # Remove build dependencies to keep the image size small
 RUN apk del .build-deps
