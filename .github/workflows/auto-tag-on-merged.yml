@@ -1,0 +1,39 @@
+name: Auto Tag on Dependabot Merged PR
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  auto-tag-on-merged:
+    if: github.event.pull_request.merged == true && github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+
+      - name: Get the updated package and version
+        id: get_version
+        run: |
+          package_name=$(git diff HEAD~1 HEAD -- requirements.txt | grep "^+[^+]" | awk -F'[=\\[]' '{print $1}' | sed 's/^+//')
+          package_version=$(git diff HEAD~1 HEAD -- requirements.txt | grep "^+[^+]" | awk -F'==' '{print $2}')
+          if [[ -z "$package_name" || -z "$package_version" ]]; then
+            echo "No updated package found. Exiting..."
+            exit 1
+          fi
+          echo "PACKAGE_NAME=$package_name" >> $GITHUB_ENV
+          echo "PACKAGE_VERSION=$package_version" >> $GITHUB_ENV
+
+      - name: Create new tag
+        run: |
+          git config user.name "${{ secrets.USER }}"
+          git config user.email "${{ secrets.EMAIL }}"
+          git tag -a "${PACKAGE_VERSION}" -m "Update ${PACKAGE_NAME} to version ${PACKAGE_VERSION}"
+          git push https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }} "${PACKAGE_VERSION}"
