@@ -1,1 +1,1 @@
-myskoda[cli]==0.10.0
+myskoda[cli]==0.11.0
